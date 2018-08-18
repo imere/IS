@@ -20,8 +20,17 @@ app.use(helmet.hidePoweredBy({ setTo: 'nginx' }))
  */
 app.use(helmet.frameguard({ action: 'deny' }))
 
+/*
+ * The X-XSS-Protection HTTP header is a basic protection. The browser
+ * detects a potential injected script using a heuristic filter. If the
+ * header is enabled, the browser changes the script code, neutralizing it.
+ * It still has limited support.
+ */
+app.use(helmet.xssFilter())
+
 app.get('*', (req, res) => {
   // res.setHeader('X-Frame-Options', 'DENY') // alternative to helmet.frameguard()
+  // res.setHeader('X-XSS-Protection', '1; mode=block') // alternative to helmet.xssFilter()
   res.end(fs.readFileSync('./index.html'))
 })
 
