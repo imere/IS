@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Information Security with HelmetJS</title>
+</head>
+<style>
+  body {
+    background-color: black;
+  }
+
+  span {
+    background-color: white;
+  }
+</style>
+
+<body>
+  <span>site</span>
+  <!-- frameguard test -->
+  <iframe></iframe>
+  <script>
+    document.querySelector('iframe').src = window.location.href;
+  </script>
+</body>
+
+</html>
