@@ -28,9 +28,21 @@ app.use(helmet.frameguard({ action: 'deny' }))
  */
 app.use(helmet.xssFilter())
 
+/*
+ * Browsers can use content or MIME sniffing to adapt to different
+ * datatypes coming from a response. They override the Content-Type
+ * headers to guess and process the data. While this can be convenient
+ * in some scenarios, it can also lead to some dangerous attacks.
+ * This middleware sets the X-Content-Type-Options header to nosniff.
+ * This instructs the browser to not bypass the provided Content-Type.
+ */
+app.use(helmet.noSniff())
+
 app.get('*', (req, res) => {
   // res.setHeader('X-Frame-Options', 'DENY') // alternative to helmet.frameguard()
   // res.setHeader('X-XSS-Protection', '1; mode=block') // alternative to helmet.xssFilter()
+  // res.setHeader('X-Content-Type-Options', 'nosniff') // alternative to helmet.noSniff()
+  res.setHeader('Content-Type', 'text/html')
   res.end(fs.readFileSync('./index.html'))
 })
 
