@@ -73,6 +73,11 @@ app.use(helmet.hsts({ maxAge: 10000, force: true }))
  */
 app.use(helmet.dnsPrefetchControl())
 
+/*
+ * Disable Client-Side Caching
+ */
+app.use(helmet.noCache())
+
 app.get('*', (req, res) => {
   // res.setHeader('X-Frame-Options', 'DENY') // alternative to helmet.frameguard()
   // res.setHeader('X-XSS-Protection', '1; mode=block') // alternative to helmet.xssFilter()
@@ -80,6 +85,10 @@ app.get('*', (req, res) => {
   // res.setHeader('X-Download-Options', 'noopen') // alternative to helmet.ieNoOpen()
   // res.setHeader('Strict-Transport-Security', 'max-age=1000; includeSubDomain') // alternative to helmet.hsts()
   // res.setHeader('X-DNS-Prefetch-Control', 'off') // alternative to helmet.dnsPrefetchControl()
+  // res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+  // res.setHeader('Pragma', 'no-cache')
+  // res.setHeader('Surrogate-Control', 'no-store')
+  // res.setHeader('Expires', '0') // alternative to helmet.noCache()
   res.setHeader('Content-Type', 'text/html')
   res.end(fs.readFileSync('./index.html'))
 })
