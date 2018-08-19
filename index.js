@@ -47,11 +47,26 @@ app.use(helmet.noSniff())
  */
 app.use(helmet.ieNoOpen())
 
+/*
+ * HTTP Strict Transport Security (HSTS) is a web security policy which
+ * helps to protect websites against protocol downgrade attacks and
+ * cookie hijacking. This will work for the requests coming after the
+ * initial request.
+ * Configure helmet.hsts() to use HTTPS for the next 90 days. Pass the
+ * config object { maxAge: timeInMilliseconds, force: true }. Set the
+ * field "force" to true in the config object, we will intercept and restore
+ * the header.
+ * Configuring HTTPS on a custom website requires the acquisition of
+ * a domain, and a SSL/TSL Certificate.
+ */
+app.use(helmet.hsts({ maxAge: 10000, force: true }))
+
 app.get('*', (req, res) => {
   // res.setHeader('X-Frame-Options', 'DENY') // alternative to helmet.frameguard()
   // res.setHeader('X-XSS-Protection', '1; mode=block') // alternative to helmet.xssFilter()
   // res.setHeader('X-Content-Type-Options', 'nosniff') // alternative to helmet.noSniff()
   // res.setHeader('X-Download-Options', 'noopen') // alternative to helmet.ieNoOpen()
+  // res.setHeader('Strict-Transport-Security', 'max-age=1000; includeSubDomain') // alternative to helmet.hsts()
   res.setHeader('Content-Type', 'text/html')
   res.end(fs.readFileSync('./index.html'))
 })
