@@ -1,4 +1,5 @@
 const express = require('express')
+const bodyParser = require('body-parser')
 const helmet = require('helmet')
 const fs = require('fs')
 
@@ -6,19 +7,27 @@ const PORT = process.env.PORT || 8000
 
 const app = express()
 
+app.use(bodyParser.json({
+  type: ['json', 'application/csp-report']
+}))
+
 /*
  * X-Powered-By: Express is sent in every request coming from Express
  * by default. The helmet.hidePoweredBy() middleware will remove
  * the X-Powered-By header. You can also explicitly set the header to
  * something else, e.g. app.use(helmet.hidePoweredBy({ setTo: 'PHP 4.2.0' }))
  */
-app.use(helmet.hidePoweredBy({ setTo: 'nginx' }))
+app.use(helmet.hidePoweredBy({
+  setTo: 'nginx'
+}))
 
 /*
  * We don’t need our app to be framed.You should use helmet.frameguard()
  * passing with the configuration object {action: 'deny'}.
  */
-app.use(helmet.frameguard({ action: 'deny' }))
+app.use(helmet.frameguard({
+  action: 'deny'
+}))
 
 /*
  * The X-XSS-Protection HTTP header is a basic protection. The browser
@@ -59,7 +68,10 @@ app.use(helmet.ieNoOpen())
  * Configuring HTTPS on a custom website requires the acquisition of
  * a domain, and a SSL/TSL Certificate.
  */
-app.use(helmet.hsts({ maxAge: 10000, force: true }))
+app.use(helmet.hsts({
+  maxAge: 10000,
+  force: true
+}))
 
 /*
  * To improve performance, most browsers prefetch DNS records for the links
@@ -78,6 +90,32 @@ app.use(helmet.dnsPrefetchControl())
  */
 app.use(helmet.noCache())
 
+/*
+ * CSP works by defining a whitelist of content sources which are trusted. You
+ * can configure them for each kind of resource a web page may need (scripts,
+ * stylesheets, fonts, frames, media, and so on…). There are multiple directives
+ * available, so a website owner can have a granular control. See HTML 5 Rocks,
+ * KeyCDN for more details. Unfortunately CSP is unsupported by older browser.
+ * By default, directives are wide open, so it’s important to set the defaultSrc
+ * directive as a fallback. Helmet supports both defaultSrc and default-src naming
+ * styles. The fallback applies for most of the unspecified directives. Configure
+ * it setting the defaultSrc directive to ["self"] (the list of allowed sources
+ * must be in an array), in order to trust only your website address by default.
+ * Set also the scriptSrc directive so that you will allow scripts to be downloaded
+ * from your website, and from the domain 'trusted-cdn.com'.
+ * In the "'self'" keyword, the single quotes are part of the keyword itself, so
+ * it needs to be enclosed in double quotes to be working.
+ */
+app.use(helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'", "'unsafe-inline'"],
+    // styleSrc: ["'self", "'unsafe-inline'"], // comment for violation report test
+    imgSrc: ["'self'"],
+    reportUri: '/report-violation'
+  }
+}))
+
 app.get('*', (req, res) => {
   // res.setHeader('X-Frame-Options', 'DENY') // alternative to helmet.frameguard()
   // res.setHeader('X-XSS-Protection', '1; mode=block') // alternative to helmet.xssFilter()
@@ -89,12 +127,17 @@ app.get('*', (req, res) => {
   // res.setHeader('Pragma', 'no-cache')
   // res.setHeader('Surrogate-Control', 'no-store')
   // res.setHeader('Expires', '0') // alternative to helmet.noCache()
+  // res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; report-uri /report-violation") // alternative to helmet.contentSecurityPolicy()
   res.setHeader('Content-Type', 'text/html')
   res.end(fs.readFileSync('./index.html'))
 })
 
+app.post('/report-violation', (req, res) => {
+  console.log('Violation: ', req.body)
+  res.status(204).end()
+})
+
 const server = app.listen(PORT, () => {
-  console.log(server.address())
   console.log(`
     Listening on ${server.address().address + ':' + server.address().port}
   `)
