@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const helmet = require('helmet')
 const fs = require('fs')
+const bcrypt = require('bcrypt')
 
 const PORT = process.env.PORT || 8000
 
@@ -130,6 +131,15 @@ app.get('*', (req, res) => {
   // res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; report-uri /report-violation") // alternative to helmet.contentSecurityPolicy()
   res.setHeader('Content-Type', 'text/html')
   res.end(fs.readFileSync('./index.html'))
+  bcrypt.hash('data', 13, (err, d) => {
+    console.log(d)
+    bcrypt.compare('data', d, (err, b) => {
+      console.log(b)
+    })
+  })
+  const d = bcrypt.hashSync('data', 13)
+  const b = bcrypt.compareSync('data', d)
+  console.log(d, b)
 })
 
 app.post('/report-violation', (req, res) => {
