@@ -38,16 +38,27 @@ app.use(helmet.xssFilter())
  */
 app.use(helmet.noSniff())
 
+/*
+ * Some web applications will serve untrusted HTML for download. Some
+ * versions of Internet Explorer by default open those HTML files in
+ * the context of your site.This middleware sets the X-Download-Options
+ * header to noopen. This will prevent IE users from executing downloads
+ * in the trusted site’s context.
+ */
+app.use(helmet.ieNoOpen())
+
 app.get('*', (req, res) => {
   // res.setHeader('X-Frame-Options', 'DENY') // alternative to helmet.frameguard()
   // res.setHeader('X-XSS-Protection', '1; mode=block') // alternative to helmet.xssFilter()
   // res.setHeader('X-Content-Type-Options', 'nosniff') // alternative to helmet.noSniff()
+  // res.setHeader('X-Download-Options', 'noopen') // alternative to helmet.ieNoOpen()
   res.setHeader('Content-Type', 'text/html')
   res.end(fs.readFileSync('./index.html'))
 })
 
 const server = app.listen(PORT, () => {
+  console.log(server.address())
   console.log(`
-    Listening on port ${server.address().port}
+    Listening on ${server.address().address + ':' + server.address().port}
   `)
-})
+});
